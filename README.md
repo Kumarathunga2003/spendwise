@@ -1,119 +1,131 @@
-# SpendWise — Complete Flutter source package
+# SpendWise
 
-A functional, offline personal finance tracker suitable for a Flutter coursework/demo project. **This package is meant to be merged into the existing `spendwise` Flutter project**. It is not a replacement for Flutter's generated `android`, `ios`, `windows`, `web`, or other platform folders.
+**A simple way to understand your money.**
+
+SpendWise is a Flutter personal finance app that helps you track income, manage expenses, and set monthly budgets. It brings your balance, spending history, and category budgets together in a clean interface with light and dark themes.
+
+Built by **Gaweesha** · Current UI version: **2.0** · Primary target: **Android**
 
 ## Features
 
-- Home dashboard: all-time balance, this month's income and expenses, recent transactions.
-- Transaction history: add, edit, delete, search, filter by income/expense.
-- Transaction details: amount (LKR), date, type, category, optional note.
-- Monthly budgets: reusable limits for each expense category, progress and overspending warnings.
-- Reports: monthly income, expenses, net cash flow, category spending, six-month income/expense chart.
-- Settings: light/dark theme and copy transactions as a CSV backup.
-- Persistent **local** data using Flutter `shared_preferences` (Android, iOS, web, desktop).
-- Responsive Flutter Material UI. No sign-in or cloud service required.
+- **Balance overview** — See your total income, expenses, and available balance.
+- **Transaction management** — Add, edit, and delete income and expense records.
+- **Categories and notes** — Organize transactions and add useful details.
+- **Transaction history** — Review past income and spending.
+- **Monthly budgets** — Set category limits and track spending against them.
+- **Reports** — Explore monthly totals and spending by category.
+- **Dark mode** — Switch between light and dark themes.
+- **CSV export** — Copy transaction records as CSV for use in a spreadsheet.
+- **Local storage** — Keep financial records on your device without creating an account.
+- **Custom branding** — SpendWise app icon and splash screen.
 
-## Step 1 — Back up your current project
+## Built with
 
-In Windows File Explorer, make a copy of:
+- Flutter and Dart
+- Material Design
+- Android tooling
 
-`C:\Users\Gaweesha\Desktop\Projects\spendwise`
+See [`pubspec.yaml`](pubspec.yaml) for the project's dependencies and SDK requirements.
 
-Your current browser demo transactions are **not yet saved**; before replacing the app, manually note the sample transactions and re-enter them after installing this version.
+## Getting started
 
-## Step 2 — Copy in the source
+### Requirements
 
-1. Extract `SpendWise_Complete_Flutter_Source.zip` to a folder.
-2. Open your existing `spendwise` folder in VS Code.
-3. Copy the **contents** of the extracted `lib` folder into your existing `spendwise/lib` folder, allowing overwrites of `lib/main.dart`.
-4. Replace the existing `spendwise/pubspec.yaml` with the provided `pubspec.yaml` (back up your original first).
-5. Replace the starter files in `spendwise/test` with the provided tests (the original `widget_test.dart` tests the Flutter counter app and is no longer relevant).
-6. Keep all existing platform folders (`android`, `ios`, `web`, and so on). Keep `pubspec.lock`; `flutter pub get` will update it as needed.
+- Flutter SDK, including Dart
+- Git
+- Android SDK and an Android emulator, or an Android phone with USB debugging enabled
+- VS Code or Android Studio
 
-The extra `lib/oracleJdk-27` folder from your earlier project is not required by this app. **Do not delete it until you have made a backup and confirmed you have another working JDK installation.**
+### Installation
 
-New source layout:
+Clone the repository and install its dependencies:
 
-```
-lib/
-  main.dart
-  data/app_store.dart
-  models/money_transaction.dart
-  screens/
-    home_shell.dart
-    dashboard_page.dart
-    transactions_page.dart
-    budgets_page.dart
-    reports_page.dart
-    settings_page.dart
-  theme/app_theme.dart
-  utils/formatters.dart
-  widgets/
-    transaction_form.dart
-    transaction_tile.dart
-```
-
-## Step 3 — Run in Chrome
-
-From the VS Code terminal **inside your original `spendwise` folder**:
-
-```powershell
+```bash
+git clone https://github.com/Kumarathunga2003/spendwise.git
+cd spendwise
 flutter pub get
+```
+
+The repository is private, so cloning requires a GitHub account with access.
+
+Check your development environment and connected devices:
+
+```bash
+flutter doctor
+flutter devices
+```
+
+Run the app on your Android device or emulator, replacing `DEVICE_ID` with an ID from `flutter devices`:
+
+```bash
+flutter run -d DEVICE_ID
+```
+
+### Code checks
+
+```bash
 flutter analyze
 flutter test
-flutter run -d chrome --web-port=5000
 ```
 
-If the old counter app is already running, press `q` in its terminal, then run the new app again. A **full restart** is preferable after adding a new plugin (`shared_preferences`).
+### Build an Android APK
 
-## Step 4 — Run on Android
-
-```powershell
-flutter emulators
+```bash
+flutter build apk --release
 ```
 
-Launch an available emulator using its displayed ID:
+The generated APK is available at:
 
-```powershell
-flutter emulators --launch <EMULATOR_ID>
-flutter devices
-flutter run -d <DEVICE_ID>
+```text
+build/app/outputs/flutter-apk/app-release.apk
 ```
 
-Alternatively, connect an Android phone with developer options / USB debugging enabled and choose its device ID shown by `flutter devices`.
+For distribution, configure your own release signing and keep signing credentials outside version control. When updating an installed app, retain its application ID and signing key to preserve update compatibility.
 
-## How to test
+## Project structure
 
-1. Home → Add transaction → enter Salary, 5000, Income → Save.
-2. Add Food, 2000, Expense → Save. Balance should be Rs. 3,000.00.
-3. History → Edit Food; confirm the dashboard changes. Delete it and check totals.
-4. Budgets → Set Food limit to Rs. 1,000.00, then add a Food expense of Rs. 2,000.00. A warning should appear.
-5. Reports → View monthly totals and chart.
-6. Stop the app and run it again with the same `--web-port=5000`. Transactions should still be present if browser site storage has not been cleared.
-7. Settings → Copy transactions as CSV → paste into a text file and save the file as `.csv` if you need a basic manual export.
+| Path | Purpose |
+| --- | --- |
+| `lib/main.dart` | App entry point |
+| `lib/data/` | App state and data storage |
+| `lib/models/` | Transaction and budget models |
+| `lib/screens/` | Dashboard, history, budgets, reports, and settings |
+| `lib/theme/` | App colors and themes |
+| `lib/utils/` | Formatting and shared helpers |
+| `lib/widgets/` | Reusable interface components |
+| `assets/branding/` | Logo, app icon, and splash assets |
+| `android/` | Android configuration and native resources |
+| `test/` | Automated tests |
 
-## Storage and limitations
+## Privacy and data
 
-- `shared_preferences` is intended for small, simple local data. It is **not a database intended for large or sensitive financial records** and does not guarantee durable backups.
-- Entries and budgets are **per local installation / browser origin**. Flutter web debug servers often pick a new random port each run, which changes the browser origin. Always use `flutter run -d chrome --web-port=5000` when testing storage in Chrome. Chrome and your Android phone do not sync. Clearing browser storage or uninstalling the app may delete data.
-- The CSV feature **copies text to the clipboard**; it does not directly create a file or support re-import.
-- Budget limits apply to categories and repeat each month, while spending is calculated separately for the selected month.
-- No bank API, multi-user login, notifications, encryption, authentication, or cloud backup is included.
-- For production use, add an appropriate database, backups, encryption/security review, and financial rounding rules (e.g. store amounts as integer cents).
+SpendWise keeps financial records locally. It does not require an account or provide cloud synchronization.
 
-## Dependency
+- Uninstalling the app or clearing its storage can remove saved records.
+- CSV exports contain transactions only, not budgets or preferences, and are not encrypted.
+- Local storage alone does not guarantee encryption. Use your device's screen lock to help protect access.
+- Saving source code on GitHub does not back up records stored inside the app.
+- Keep personal exports, backup files, passwords, and signing keys out of the repository.
 
-`shared_preferences: ^2.5.3` in `pubspec.yaml`. `flutter pub get` picks a compatible version for your installed SDK. This plugin supports the existing browser/desktop and mobile target platforms.
+## Planned improvements
 
-## Tests
+- PIN and biometric app unlock
+- Automatic locking when the app moves into the background
+- Stronger protection for locally stored records
+- Multiple wallets
+- Recurring income and expenses
 
-Pure model and formatter tests live in `test/transaction_model_test.dart` and `test/widget_test.dart`. No device is required to run them via `flutter test`.
+These are planned features and are not promises of availability in the current version.
 
-## Troubleshooting
+## Development status
 
-- **Missing package**: run `flutter pub get` from the project root, not from inside `lib`.
-- **Default Flutter Demo still appears**: make sure the `lib/main.dart` in your **existing** project was replaced, then stop the process and run `flutter run -d chrome --web-port=5000` again.
-- **Storage plugin error after hot reload**: stop and fully restart the app.
-- **Package or SDK incompatibility**: try `flutter pub add shared_preferences` in your project to get a compatible version, then `flutter pub get`.
-- **Old test mentions MyApp / increment counter**: replace `test/widget_test.dart` with the version in this ZIP.
+SpendWise is under active development. The Settings screen currently identifies the interface as **UI refresh 2.0**. Check the source and `pubspec.yaml` when identifying a particular build; the UI label may differ from the package version.
 
+## Author
+
+**Gaweesha**  
+GitHub: [@Kumarathunga2003](https://github.com/Kumarathunga2003)
+
+## License
+
+No open-source license has been added yet. All rights are reserved by the author.
