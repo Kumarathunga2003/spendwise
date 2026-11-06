@@ -1,0 +1,7 @@
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/branding/spendwise_launcher.png
+  adaptive_icon_background: '#EFFAF6'
+  adaptive_icon_foreground: assets/branding/spendwise_adaptive_foreground.png
+  adaptive_icon_foreground_inset: 0
