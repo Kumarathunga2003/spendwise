@@ -1,131 +1,135 @@
 # SpendWise
 
-**A simple way to understand your money.**
+### Keep track of your money, one day at a time.
 
-SpendWise is a Flutter personal finance app that helps you track income, manage expenses, and set monthly budgets. It brings your balance, spending history, and category budgets together in a clean interface with light and dark themes.
+SpendWise is a personal finance app I’m building with Flutter. It helps you keep a record of what you earn, see where your money goes, and plan your monthly spending.
 
-Built by **Gaweesha** · Current UI version: **2.0** · Primary target: **Android**
+You can check your balance, add daily expenses, and set budgets for different categories—all in one place. The app stores your records on your device, so there’s no account to create.
 
-## Features
+**Developer:** Gaweesha  
+**Current UI version:** 2.0  
+**Main platform:** Android
 
-- **Balance overview** — See your total income, expenses, and available balance.
-- **Transaction management** — Add, edit, and delete income and expense records.
-- **Categories and notes** — Organize transactions and add useful details.
-- **Transaction history** — Review past income and spending.
-- **Monthly budgets** — Set category limits and track spending against them.
-- **Reports** — Explore monthly totals and spending by category.
-- **Dark mode** — Switch between light and dark themes.
-- **CSV export** — Copy transaction records as CSV for use in a spreadsheet.
-- **Local storage** — Keep financial records on your device without creating an account.
-- **Custom branding** — SpendWise app icon and splash screen.
+## What you can do
 
-## Built with
+- See your total income, expenses, and remaining balance.
+- Add, edit, or delete transactions.
+- Group transactions into categories and add notes.
+- Look back through your transaction history.
+- Set monthly budgets for each spending category.
+- Check monthly reports and category spending.
+- Choose a light or dark theme.
+- Copy your transactions as CSV to use in a spreadsheet.
 
-- Flutter and Dart
-- Material Design
-- Android tooling
+## Tools used
 
-See [`pubspec.yaml`](pubspec.yaml) for the project's dependencies and SDK requirements.
+The app is built with **Flutter and Dart**, using Material Design components. You can find the packages and SDK requirements in [`pubspec.yaml`](pubspec.yaml).
 
-## Getting started
+## Run the project
 
-### Requirements
+You’ll need Flutter, Git, and the Android SDK installed. You can use VS Code or Android Studio to work on the code, and either an Android emulator or a phone with USB debugging enabled to run it.
 
-- Flutter SDK, including Dart
-- Git
-- Android SDK and an Android emulator, or an Android phone with USB debugging enabled
-- VS Code or Android Studio
-
-### Installation
-
-Clone the repository and install its dependencies:
+### 1. Download the code
 
 ```bash
 git clone https://github.com/Kumarathunga2003/spendwise.git
 cd spendwise
+```
+
+If the repository is private, you’ll need to sign in with a GitHub account that has access.
+
+### 2. Install the packages
+
+```bash
 flutter pub get
 ```
 
-The repository is private, so cloning requires a GitHub account with access.
-
-Check your development environment and connected devices:
+### 3. Check your setup
 
 ```bash
 flutter doctor
 flutter devices
 ```
 
-Run the app on your Android device or emulator, replacing `DEVICE_ID` with an ID from `flutter devices`:
+`flutter doctor` helps you spot missing setup steps. `flutter devices` lists the devices you can run the app on.
+
+### 4. Start the app
+
+Replace `DEVICE_ID` with your Android device’s ID from the previous command:
 
 ```bash
 flutter run -d DEVICE_ID
 ```
 
-### Code checks
+## Check the code
+
+Run these commands to check for code issues and run the automated tests:
 
 ```bash
 flutter analyze
 flutter test
 ```
 
-### Build an Android APK
+## Build an APK
+
+To create a release APK, run:
 
 ```bash
 flutter build apk --release
 ```
 
-The generated APK is available at:
+You’ll find the file here:
 
 ```text
 build/app/outputs/flutter-apk/app-release.apk
 ```
 
-For distribution, configure your own release signing and keep signing credentials outside version control. When updating an installed app, retain its application ID and signing key to preserve update compatibility.
+Before distributing the app, set up your own release signing. Keep your signing files private. Updates to an existing installation need the same application ID and signing key.
 
-## Project structure
+## Where to find things
 
-| Path | Purpose |
+| Folder or file | What’s inside |
 | --- | --- |
-| `lib/main.dart` | App entry point |
-| `lib/data/` | App state and data storage |
+| `lib/main.dart` | Where the app starts |
+| `lib/data/` | App state and saved data handling |
 | `lib/models/` | Transaction and budget models |
-| `lib/screens/` | Dashboard, history, budgets, reports, and settings |
-| `lib/theme/` | App colors and themes |
-| `lib/utils/` | Formatting and shared helpers |
-| `lib/widgets/` | Reusable interface components |
-| `assets/branding/` | Logo, app icon, and splash assets |
-| `android/` | Android configuration and native resources |
+| `lib/screens/` | The app’s main pages |
+| `lib/widgets/` | Components used across different pages |
+| `lib/theme/` | Colors and themes |
+| `lib/utils/` | Formatting and other helpers |
+| `assets/branding/` | SpendWise logos, icons, and splash images |
+| `android/` | Android project settings |
 | `test/` | Automated tests |
 
-## Privacy and data
+## Your data
 
-SpendWise keeps financial records locally. It does not require an account or provide cloud synchronization.
+Your financial records stay on your device. There’s no account system or cloud sync.
 
-- Uninstalling the app or clearing its storage can remove saved records.
-- CSV exports contain transactions only, not budgets or preferences, and are not encrypted.
-- Local storage alone does not guarantee encryption. Use your device's screen lock to help protect access.
-- Saving source code on GitHub does not back up records stored inside the app.
-- Keep personal exports, backup files, passwords, and signing keys out of the repository.
+Keep a backup before uninstalling the app or clearing its storage, as those actions can remove your records. CSV exports include transactions only; they don’t include budgets or preferences, and they aren’t encrypted.
 
-## Planned improvements
+Use your phone’s screen lock to help protect access. Storing records locally doesn’t, by itself, mean they are encrypted. Uploading the project to GitHub saves the source code, not the financial records inside the app. Personal backups, exports, passwords, and signing keys should stay out of this repository.
 
-- PIN and biometric app unlock
-- Automatic locking when the app moves into the background
-- Stronger protection for locally stored records
-- Multiple wallets
+## Ideas for later
+
+I plan to keep improving SpendWise. Some features I’d like to add are:
+
+- PIN and fingerprint or face unlock
+- Automatic locking when you leave the app
+- Better protection for saved records
+- Separate wallets for cash and bank accounts
 - Recurring income and expenses
 
-These are planned features and are not promises of availability in the current version.
+These are future plans and aren’t included in the current version.
 
-## Development status
+## About the version
 
-SpendWise is under active development. The Settings screen currently identifies the interface as **UI refresh 2.0**. Check the source and `pubspec.yaml` when identifying a particular build; the UI label may differ from the package version.
+The Settings screen currently shows **UI refresh 2.0**. This is the interface label; the package version is listed separately in `pubspec.yaml`.
 
 ## Author
 
-**Gaweesha**  
+Built by **Gaweesha**.  
 GitHub: [@Kumarathunga2003](https://github.com/Kumarathunga2003)
 
 ## License
 
-No open-source license has been added yet. All rights are reserved by the author.
+A license hasn’t been added yet. All rights are reserved by the author.

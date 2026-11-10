@@ -21,6 +21,8 @@ abstract class FinanceStorage {
   Future<void> deleteBudget(String category);
   Future<void> saveDarkMode(bool value);
   Future<void> replaceAll(FinanceSnapshot snapshot);
+  /// Remove all in-app financial records and legacy preference copies.
+  Future<void> eraseAllUserData();
 }
 
 /// Android/iOS/macOS use SQLite. Web/Windows/Linux retain existing preferences
@@ -103,6 +105,15 @@ class PreferencesFinanceStorage implements FinanceStorage {
       try { await _writeSnapshot(old); } catch (_) { /* original error wins */ }
       rethrow;
     }
+  }
+
+  @override
+  Future<void> eraseAllUserData() async {
+    // Preferences writes are not atomic. Remove each known user-data key;
+    // if any operation fails, propagate the error instead of claiming success.
+    await _prefs.remove(_entriesKey);
+    await _prefs.remove(_budgetsKey);
+    await _prefs.remove(_darkKey);
   }
 
   Future<void> _writeSnapshot(FinanceSnapshot value) async {
@@ -283,4 +294,27 @@ class SqliteFinanceStorage implements FinanceStorage {
           conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
+
+  @override
+  Future<void> eraseAllUserData() async {
+    final db = await _open();
+    // One SQLite transaction clears the active data and leaves a migration
+    // marker, preventing stale preferences from being imported again.
+    await db.transaction((txn) async {
+      await txn.delete('transactions');
+      await txn.delete('budgets');
+      await txn.delete('metadata');
+      await txn.insert('metadata', {
+        'key': 'legacy_import_v1',
+        'value': 'complete',
+      });
+    });
+
+    // Remove old pre-SQLite copies as well. If one removal fails, an error is
+    // reported and AppStore will refresh its visible state from SQLite.
+    await _legacy.remove(_entriesKey);
+    await _legacy.remove(_budgetsKey);
+    await _legacy.remove(_darkKey);
+  }
+
 }

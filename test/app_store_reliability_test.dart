@@ -56,6 +56,12 @@ class FakeFinanceStorage implements FinanceStorage {
         darkMode: mode);
   }
   @override
+  Future<void> eraseAllUserData() async {
+    _check();
+    snapshot = FinanceSnapshot(entries: [], budgets: [], darkMode: false);
+  }
+
+  @override
   Future<void> replaceAll(FinanceSnapshot value) async {
     _check();
     snapshot = value;
@@ -103,4 +109,44 @@ void main() {
     expect(store.budgetFor('Education'), 2300);
     expect(storage.snapshot.darkMode, isTrue);
   });
+
+  test('Deleting all data clears entries, budgets and preference', () async {
+    final storage = FakeFinanceStorage();
+    final store = AppStore(storage: storage);
+    await store.load();
+    await store.saveEntry(MoneyTransaction(
+      id: 'test-1', title: 'Sample', amount: 45.00,
+      type: EntryType.expense, category: 'Food',
+      date: DateTime(2026, 11, 7),
+    ));
+    await store.setBudget('Food', 500);
+    await store.setDarkMode(true);
+
+    await store.deleteAllData();
+    expect(store.entries, isEmpty);
+    expect(store.budgets, isEmpty);
+    expect(store.darkMode, false);
+
+    final restarted = AppStore(storage: storage);
+    await restarted.load();
+    expect(restarted.entries, isEmpty);
+    expect(restarted.budgets, isEmpty);
+    expect(restarted.darkMode, false);
+  });
+
+  test('Failed deletion does not claim success or clear visible records', () async {
+    final storage = FakeFinanceStorage();
+    final store = AppStore(storage: storage);
+    await store.load();
+    await store.saveEntry(MoneyTransaction(
+      id: 'test-2', title: 'Saved', amount: 20.00,
+      type: EntryType.income, category: 'Salary',
+      date: DateTime(2026, 11, 7),
+    ));
+    storage.failNextWrite = true;
+    await expectLater(store.deleteAllData(), throwsStateError);
+    expect(store.entries.length, 1);
+    expect(storage.snapshot.entries.length, 1);
+  });
+
 }
