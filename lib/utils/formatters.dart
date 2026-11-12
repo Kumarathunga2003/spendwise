@@ -18,11 +18,22 @@ String shortDate(DateTime date) {
 }
 
 const monthNames = <String>[
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
-String monthLabel(DateTime date) => '${monthNames[date.month - 1]} ${date.year}';
+String monthLabel(DateTime date) =>
+    '${monthNames[date.month - 1]} ${date.year}';
 
 bool sameMonth(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month;

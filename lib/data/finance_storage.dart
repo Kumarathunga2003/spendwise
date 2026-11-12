@@ -21,6 +21,7 @@ abstract class FinanceStorage {
   Future<void> deleteBudget(String category);
   Future<void> saveDarkMode(bool value);
   Future<void> replaceAll(FinanceSnapshot snapshot);
+
   /// Remove all in-app financial records and legacy preference copies.
   Future<void> eraseAllUserData();
 }
@@ -42,8 +43,10 @@ Future<FinanceSnapshot> _readLegacy(SharedPreferencesAsync prefs) async {
   final rawEntries = await prefs.getString(_entriesKey);
   final rawBudgets = await prefs.getString(_budgetsKey);
   final savedMode = await prefs.getBool(_darkKey);
-  final rawEntriesList = rawEntries == null ? <dynamic>[] : jsonDecode(rawEntries);
-  final rawBudgetList = rawBudgets == null ? <dynamic>[] : jsonDecode(rawBudgets);
+  final rawEntriesList =
+      rawEntries == null ? <dynamic>[] : jsonDecode(rawEntries);
+  final rawBudgetList =
+      rawBudgets == null ? <dynamic>[] : jsonDecode(rawBudgets);
   return FinanceSnapshot.fromJson({
     'schema_version': 1,
     'entries': rawEntriesList,
@@ -65,29 +68,35 @@ class PreferencesFinanceStorage implements FinanceStorage {
     final current = await load();
     final list = [...current.entries]..removeWhere((e) => e.id == entry.id);
     list.add(entry);
-    await _prefs.setString(_entriesKey, jsonEncode(list.map((e) => e.toJson()).toList()));
+    await _prefs.setString(
+        _entriesKey, jsonEncode(list.map((e) => e.toJson()).toList()));
   }
 
   @override
   Future<void> deleteEntry(String id) async {
     final current = await load();
     final list = [...current.entries]..removeWhere((e) => e.id == id);
-    await _prefs.setString(_entriesKey, jsonEncode(list.map((e) => e.toJson()).toList()));
+    await _prefs.setString(
+        _entriesKey, jsonEncode(list.map((e) => e.toJson()).toList()));
   }
 
   @override
   Future<void> upsertBudget(BudgetLimit budget) async {
     final current = await load();
-    final list = [...current.budgets]..removeWhere((e) => e.category == budget.category);
+    final list = [...current.budgets]
+      ..removeWhere((e) => e.category == budget.category);
     list.add(budget);
-    await _prefs.setString(_budgetsKey, jsonEncode(list.map((e) => e.toJson()).toList()));
+    await _prefs.setString(
+        _budgetsKey, jsonEncode(list.map((e) => e.toJson()).toList()));
   }
 
   @override
   Future<void> deleteBudget(String category) async {
     final current = await load();
-    final list = [...current.budgets]..removeWhere((e) => e.category == category);
-    await _prefs.setString(_budgetsKey, jsonEncode(list.map((e) => e.toJson()).toList()));
+    final list = [...current.budgets]
+      ..removeWhere((e) => e.category == category);
+    await _prefs.setString(
+        _budgetsKey, jsonEncode(list.map((e) => e.toJson()).toList()));
   }
 
   @override
@@ -102,7 +111,9 @@ class PreferencesFinanceStorage implements FinanceStorage {
     try {
       await _writeSnapshot(snapshot);
     } catch (_) {
-      try { await _writeSnapshot(old); } catch (_) { /* original error wins */ }
+      try {
+        await _writeSnapshot(old);
+      } catch (_) {/* original error wins */}
       rethrow;
     }
   }
@@ -117,8 +128,10 @@ class PreferencesFinanceStorage implements FinanceStorage {
   }
 
   Future<void> _writeSnapshot(FinanceSnapshot value) async {
-    await _prefs.setString(_entriesKey, jsonEncode(value.entries.map((e) => e.toJson()).toList()));
-    await _prefs.setString(_budgetsKey, jsonEncode(value.budgets.map((e) => e.toJson()).toList()));
+    await _prefs.setString(
+        _entriesKey, jsonEncode(value.entries.map((e) => e.toJson()).toList()));
+    await _prefs.setString(
+        _budgetsKey, jsonEncode(value.budgets.map((e) => e.toJson()).toList()));
     await _prefs.setBool(_darkKey, value.darkMode);
   }
 }
@@ -133,7 +146,8 @@ class SqliteFinanceStorage implements FinanceStorage {
   Future<Database> _open() async {
     if (_db != null) return _db!;
     final path = p.join(await getDatabasesPath(), 'spendwise_v2.db');
-    final db = await openDatabase(path, version: 1, onCreate: (db, version) async {
+    final db =
+        await openDatabase(path, version: 1, onCreate: (db, version) async {
       await db.execute('''
         CREATE TABLE transactions (
           id TEXT PRIMARY KEY,
@@ -151,8 +165,10 @@ class SqliteFinanceStorage implements FinanceStorage {
           amount_cents INTEGER NOT NULL CHECK(amount_cents > 0)
         )
       ''');
-      await db.execute('CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
-      await db.execute('CREATE INDEX idx_transactions_date ON transactions(date_iso)');
+      await db.execute(
+          'CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
+      await db.execute(
+          'CREATE INDEX idx_transactions_date ON transactions(date_iso)');
     });
     try {
       await _migrateLegacyIfNeeded(db);
@@ -165,8 +181,11 @@ class SqliteFinanceStorage implements FinanceStorage {
   }
 
   Future<void> _migrateLegacyIfNeeded(Database db) async {
-    final existing = await db.query('metadata', columns: ['value'],
-        where: 'key = ?', whereArgs: ['legacy_import_v1'], limit: 1);
+    final existing = await db.query('metadata',
+        columns: ['value'],
+        where: 'key = ?',
+        whereArgs: ['legacy_import_v1'],
+        limit: 1);
     if (existing.isNotEmpty) return;
 
     // Parse AND validate before opening the SQL transaction. Errors leave
@@ -174,9 +193,11 @@ class SqliteFinanceStorage implements FinanceStorage {
     final previous = await _readLegacy(_legacy);
     await db.transaction((txn) async {
       final tCount = Sqflite.firstIntValue(
-          await txn.rawQuery('SELECT COUNT(*) FROM transactions')) ?? 0;
+              await txn.rawQuery('SELECT COUNT(*) FROM transactions')) ??
+          0;
       final bCount = Sqflite.firstIntValue(
-          await txn.rawQuery('SELECT COUNT(*) FROM budgets')) ?? 0;
+              await txn.rawQuery('SELECT COUNT(*) FROM budgets')) ??
+          0;
       if (tCount == 0 && bCount == 0) {
         for (final entry in previous.entries) {
           await txn.insert('transactions', _entryMap(entry));
@@ -184,11 +205,13 @@ class SqliteFinanceStorage implements FinanceStorage {
         for (final budget in previous.budgets) {
           await txn.insert('budgets', _budgetMap(budget));
         }
-        await txn.insert('metadata', {'key': 'dark_mode', 'value': previous.darkMode ? '1' : '0'},
+        await txn.insert('metadata',
+            {'key': 'dark_mode', 'value': previous.darkMode ? '1' : '0'},
             conflictAlgorithm: ConflictAlgorithm.replace);
       }
       // No import when DB already has records: prevents overwriting changes.
-      await txn.insert('metadata', {'key': 'legacy_import_v1', 'value': 'complete'},
+      await txn.insert(
+          'metadata', {'key': 'legacy_import_v1', 'value': 'complete'},
           conflictAlgorithm: ConflictAlgorithm.replace);
     });
     // Intentionally do NOT delete the v1 SharedPreferences keys.
@@ -214,26 +237,33 @@ class SqliteFinanceStorage implements FinanceStorage {
     final db = await _open();
     final integrity = await db.rawQuery('PRAGMA quick_check');
     if (integrity.isEmpty || integrity.first.values.first != 'ok') {
-      throw StateError('SQLite integrity check failed. Restore from a verified backup.');
+      throw StateError(
+          'SQLite integrity check failed. Restore from a verified backup.');
     }
     final rows = await db.query('transactions');
     final limits = await db.query('budgets');
-    final modeRow = await db.query('metadata', where: 'key = ?',
-        whereArgs: ['dark_mode'], limit: 1);
+    final modeRow = await db.query('metadata',
+        where: 'key = ?', whereArgs: ['dark_mode'], limit: 1);
     return FinanceSnapshot(
-      entries: rows.map((r) => MoneyTransaction(
-        id: r['id'] as String,
-        title: r['title'] as String,
-        amount: (r['amount_cents'] as int) / 100,
-        type: r['type'] == 'income' ? EntryType.income : EntryType.expense,
-        category: r['category'] as String,
-        date: DateTime.parse(r['date_iso'] as String),
-        note: r['note'] as String,
-      )).toList(),
-      budgets: limits.map((r) => BudgetLimit(
-        category: r['category'] as String,
-        amount: (r['amount_cents'] as int) / 100,
-      )).toList(),
+      entries: rows
+          .map((r) => MoneyTransaction(
+                id: r['id'] as String,
+                title: r['title'] as String,
+                amount: (r['amount_cents'] as int) / 100,
+                type: r['type'] == 'income'
+                    ? EntryType.income
+                    : EntryType.expense,
+                category: r['category'] as String,
+                date: DateTime.parse(r['date_iso'] as String),
+                note: r['note'] as String,
+              ))
+          .toList(),
+      budgets: limits
+          .map((r) => BudgetLimit(
+                category: r['category'] as String,
+                amount: (r['amount_cents'] as int) / 100,
+              ))
+          .toList(),
       darkMode: modeRow.isNotEmpty && modeRow.first['value'] == '1',
     );
   }
@@ -267,7 +297,8 @@ class SqliteFinanceStorage implements FinanceStorage {
   @override
   Future<void> saveDarkMode(bool value) async {
     final db = await _open();
-    await db.insert('metadata', {'key': 'dark_mode', 'value': value ? '1' : '0'},
+    await db.insert(
+        'metadata', {'key': 'dark_mode', 'value': value ? '1' : '0'},
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
@@ -289,8 +320,8 @@ class SqliteFinanceStorage implements FinanceStorage {
       await txn.insert('metadata',
           {'key': 'dark_mode', 'value': snapshot.darkMode ? '1' : '0'},
           conflictAlgorithm: ConflictAlgorithm.replace);
-      await txn.insert('metadata',
-          {'key': 'legacy_import_v1', 'value': 'complete'},
+      await txn.insert(
+          'metadata', {'key': 'legacy_import_v1', 'value': 'complete'},
           conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
@@ -316,5 +347,4 @@ class SqliteFinanceStorage implements FinanceStorage {
     await _legacy.remove(_budgetsKey);
     await _legacy.remove(_darkKey);
   }
-
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Reusable SpendWise brand symbol. Register assets/branding/ in pubspec.yaml.
 class SpendWiseBrandLogo extends StatelessWidget {

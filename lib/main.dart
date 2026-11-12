@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'data/app_store.dart';
 import 'screens/home_shell.dart';
@@ -49,7 +49,8 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
                     body: Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24),
-                        child: Text(store.loadError!, textAlign: TextAlign.center),
+                        child:
+                            Text(store.loadError!, textAlign: TextAlign.center),
                       ),
                     ),
                   )

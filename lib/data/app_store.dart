@@ -12,7 +12,8 @@ import 'finance_storage.dart';
 /// Writes complete on disk before in-memory UI state is changed.
 class AppStore extends ChangeNotifier {
   final FinanceStorage _storage;
-  AppStore({FinanceStorage? storage}) : _storage = storage ?? createFinanceStorage();
+  AppStore({FinanceStorage? storage})
+      : _storage = storage ?? createFinanceStorage();
 
   List<MoneyTransaction> _entries = [];
   List<BudgetLimit> _budgets = [];
@@ -43,8 +44,9 @@ class AppStore extends ChangeNotifier {
 
   // Integer minor-unit aggregation avoids floating-point rounding drift.
   static double _sum(Iterable<MoneyTransaction> values, EntryType type) =>
-      values.where((e) => e.type == type)
-          .fold<int>(0, (total, entry) => total + FinanceSnapshot.cents(entry.amount)) / 100;
+      values.where((e) => e.type == type).fold<int>(
+          0, (total, entry) => total + FinanceSnapshot.cents(entry.amount)) /
+      100;
 
   Iterable<MoneyTransaction> entriesInMonth(DateTime month) =>
       _entries.where((entry) => sameMonth(entry.date, month));
@@ -58,7 +60,8 @@ class AppStore extends ChangeNotifier {
   double spendingForCategory(String category, DateTime month) =>
       entriesInMonth(month)
           .where((e) => e.type == EntryType.expense && e.category == category)
-          .fold<int>(0, (sum, e) => sum + FinanceSnapshot.cents(e.amount)) / 100;
+          .fold<int>(0, (sum, e) => sum + FinanceSnapshot.cents(e.amount)) /
+      100;
 
   double? budgetFor(String category) {
     for (final budget in _budgets) {
@@ -129,7 +132,8 @@ class AppStore extends ChangeNotifier {
         notifyListeners();
       });
 
-  Future<void> setBudget(String category, double amount) => _exclusive(() async {
+  Future<void> setBudget(String category, double amount) =>
+      _exclusive(() async {
         final budget = BudgetLimit(category: category, amount: amount);
         final next = [..._budgets]..removeWhere((b) => b.category == category);
         next.add(budget);
@@ -157,15 +161,18 @@ class AppStore extends ChangeNotifier {
     return BackupCrypto.encrypt(currentSnapshot, passphrase);
   }
 
-  Future<FinanceSnapshot> previewEncryptedBackup(Uint8List file, String passphrase) =>
+  Future<FinanceSnapshot> previewEncryptedBackup(
+          Uint8List file, String passphrase) =>
       BackupCrypto.decrypt(file, passphrase);
 
-  Future<void> restoreSnapshot(FinanceSnapshot snapshot) => _exclusive(() async {
+  Future<void> restoreSnapshot(FinanceSnapshot snapshot) =>
+      _exclusive(() async {
         snapshot.validate();
         await _storage.replaceAll(snapshot);
         _setState(snapshot);
         notifyListeners();
       });
+
   /// Clears transactions, budgets, theme preference and pre-SQLite legacy data.
   /// External backup/CSV files are separate and not deleted here.
   Future<void> deleteAllData() => _exclusive(() async {
@@ -191,6 +198,4 @@ class AppStore extends ChangeNotifier {
           rethrow;
         }
       });
-
 }
-

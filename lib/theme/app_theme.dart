@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// SpendWise's visual tokens. There are no additional font or UI dependencies.
 class SpendColors {
@@ -33,22 +33,23 @@ class AppTheme {
     );
     final base = ThemeData(useMaterial3: true, colorScheme: scheme);
     return base.copyWith(
-      scaffoldBackgroundColor: dark
-          ? SpendColors.darkBackground
-          : SpendColors.lightBackground,
+      scaffoldBackgroundColor:
+          dark ? SpendColors.darkBackground : SpendColors.lightBackground,
       textTheme: base.textTheme.copyWith(
         headlineMedium: base.textTheme.headlineMedium?.copyWith(
-          fontWeight: FontWeight.w800, letterSpacing: -0.7,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.7,
         ),
         titleLarge: base.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w800, letterSpacing: -0.3,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.3,
         ),
-        titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        titleMedium:
+            base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
       ),
       appBarTheme: AppBarThemeData(
-        backgroundColor: dark
-            ? SpendColors.darkBackground
-            : SpendColors.lightBackground,
+        backgroundColor:
+            dark ? SpendColors.darkBackground : SpendColors.lightBackground,
         foregroundColor: dark ? Colors.white : SpendColors.ink,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -74,7 +75,8 @@ class AppTheme {
       inputDecorationTheme: InputDecorationThemeData(
         filled: true,
         fillColor: surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: stroke),
@@ -91,29 +93,35 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 15),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
-        indicatorColor: dark ? const Color(0xFF28574B) : const Color(0xFFD6F0E7),
+        indicatorColor:
+            dark ? const Color(0xFF28574B) : const Color(0xFFD6F0E7),
         elevation: 0,
         height: 77,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStatePropertyAll(
-          TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
-            color: dark ? Colors.white : SpendColors.ink),
+          TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: dark ? Colors.white : SpendColors.ink),
         ),
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: surface,
-        indicatorColor: dark ? const Color(0xFF28574B) : const Color(0xFFD6F0E7),
+        indicatorColor:
+            dark ? const Color(0xFF28574B) : const Color(0xFFD6F0E7),
         selectedLabelTextStyle: const TextStyle(fontWeight: FontWeight.w800),
       ),
       chipTheme: ChipThemeData(

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Before Play submission: replace the two values below with public details
 /// matching your Play Console developer identity and support contact.
-const spendWiseDeveloperName = 'ADD DEVELOPER NAME BEFORE PUBLISHING';
-const spendWiseSupportEmail = 'ADD SUPPORT EMAIL BEFORE PUBLISHING';
+const spendWiseDeveloperName = 'R.P.G.B Kumarathunga';
+const spendWiseSupportEmail = 'gaweesha2003@gmail.com';
 
 class SpendWisePrivacyPage extends StatelessWidget {
   const SpendWisePrivacyPage({super.key});
@@ -73,7 +73,8 @@ class SpendWisePrivacyPage extends StatelessWidget {
                 'Privacy questions: $spendWiseSupportEmail',
           ),
           const SizedBox(height: 8),
-          Text('Please review this policy against the final published '
+          Text(
+              'Please review this policy against the final published '
               'application and its dependencies before release.',
               style: Theme.of(context).textTheme.bodySmall),
         ],

@@ -20,19 +20,22 @@ class BackupCrypto {
     return List<int>.generate(count, (_) => random.nextInt(256));
   }
 
-  static Future<Uint8List> encrypt(FinanceSnapshot snapshot, String password) async {
+  static Future<Uint8List> encrypt(
+      FinanceSnapshot snapshot, String password) async {
     _checkPassword(password);
     snapshot.validate();
     final salt = _randomBytes(16);
     final nonce = _randomBytes(12);
-    final kdf = Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: _iterations, bits: 256);
-    final key = await kdf.deriveKeyFromPassword(password: password, nonce: salt);
+    final kdf =
+        Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: _iterations, bits: 256);
+    final key =
+        await kdf.deriveKeyFromPassword(password: password, nonce: salt);
     final encoded = utf8.encode(jsonEncode(snapshot.toJson()));
     if (encoded.length > _maxBytes) {
       throw const FormatException('Backup too large to export.');
     }
-    final box = await _aes.encrypt(encoded, secretKey: key, nonce: nonce,
-        aad: utf8.encode(_format));
+    final box = await _aes.encrypt(encoded,
+        secretKey: key, nonce: nonce, aad: utf8.encode(_format));
     return Uint8List.fromList(utf8.encode(jsonEncode({
       'format': _format,
       'kdf': 'PBKDF2-HMAC-SHA256',
@@ -44,7 +47,8 @@ class BackupCrypto {
     })));
   }
 
-  static Future<FinanceSnapshot> decrypt(Uint8List encodedFile, String password) async {
+  static Future<FinanceSnapshot> decrypt(
+      Uint8List encodedFile, String password) async {
     if (encodedFile.isEmpty || encodedFile.length > _maxBytes) {
       throw const FormatException('Invalid or oversized SpendWise backup.');
     }
@@ -52,7 +56,8 @@ class BackupCrypto {
     try {
       decoded = jsonDecode(utf8.decode(encodedFile));
     } catch (_) {
-      throw const FormatException('This is not a valid encrypted SpendWise backup file.');
+      throw const FormatException(
+          'This is not a valid encrypted SpendWise backup file.');
     }
     if (decoded is! Map<String, dynamic> ||
         decoded['format'] != _format ||
@@ -68,12 +73,16 @@ class BackupCrypto {
       final nonce = base64Decode(decoded['nonce'] as String);
       final cipherText = base64Decode(decoded['ciphertext'] as String);
       final mac = base64Decode(decoded['mac'] as String);
-      if (salt.length != 16 || nonce.length != 12 || mac.length != 16 ||
+      if (salt.length != 16 ||
+          nonce.length != 12 ||
+          mac.length != 16 ||
           cipherText.length > _maxBytes) {
         throw const FormatException('Malformed encrypted backup.');
       }
-      final kdf = Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: iterations, bits: 256);
-      final key = await kdf.deriveKeyFromPassword(password: password, nonce: salt);
+      final kdf = Pbkdf2(
+          macAlgorithm: Hmac.sha256(), iterations: iterations, bits: 256);
+      final key =
+          await kdf.deriveKeyFromPassword(password: password, nonce: salt);
       final clearText = await _aes.decrypt(
         SecretBox(cipherText, nonce: nonce, mac: Mac(mac)),
         secretKey: key,
@@ -93,7 +102,8 @@ class BackupCrypto {
 
   static void _checkPassword(String value) {
     if (value.length < 12 || value.length > 256) {
-      throw const FormatException('Use a backup passphrase of at least 12 characters.');
+      throw const FormatException(
+          'Use a backup passphrase of at least 12 characters.');
     }
   }
 }

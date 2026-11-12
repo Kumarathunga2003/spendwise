@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../data/app_store.dart';
 import '../models/money_transaction.dart';
@@ -18,8 +18,8 @@ class _BudgetsPageState extends State<BudgetsPage> {
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
 
   void _changeMonth(int offset) => setState(() {
-    _month = DateTime(_month.year, _month.month + offset);
-  });
+        _month = DateTime(_month.year, _month.month + offset);
+      });
 
   Future<void> _editBudget(String category) async {
     final result = await showDialog<_BudgetResult>(
@@ -53,11 +53,14 @@ class _BudgetsPageState extends State<BudgetsPage> {
   @override
   Widget build(BuildContext context) {
     final totalBudget = widget.store.budgets.fold<double>(
-      0, (total, b) => total + b.amount,
+      0,
+      (total, b) => total + b.amount,
     );
     final totalSpent = widget.store.expensesForMonth(_month);
     final budgetedSpent = widget.store.budgets.fold<double>(
-      0, (total, budget) => total + widget.store.spendingForCategory(budget.category, _month),
+      0,
+      (total, budget) =>
+          total + widget.store.spendingForCategory(budget.category, _month),
     );
     final remaining = totalBudget - budgetedSpent;
 
@@ -72,7 +75,8 @@ class _BudgetsPageState extends State<BudgetsPage> {
         const SizedBox(height: 14),
         Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [SpendColors.deep, SpendColors.teal]),
+            gradient: const LinearGradient(
+                colors: [SpendColors.deep, SpendColors.teal]),
             borderRadius: BorderRadius.circular(23),
           ),
           child: Padding(
@@ -81,23 +85,27 @@ class _BudgetsPageState extends State<BudgetsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Spent this month',
-                  style: TextStyle(color: Colors.white70)),
+                    style: TextStyle(color: Colors.white70)),
                 const SizedBox(height: 7),
                 FittedBox(
                   alignment: Alignment.centerLeft,
-                  child: Text(money(totalSpent), style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w800,
-                    fontSize: 28,
-                  )),
+                  child: Text(money(totalSpent),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 28,
+                      )),
                 ),
                 const SizedBox(height: 13),
                 Text('Category budget limits: ${money(totalBudget)}',
-                  style: const TextStyle(color: Colors.white70)),
+                    style: const TextStyle(color: Colors.white70)),
                 if (totalBudget > 0)
-                  Text(remaining >= 0
-                      ? 'Left in budgeted categories: ${money(remaining)}'
-                      : 'Above budgeted limits by: ${money(-remaining)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12)),
+                  Text(
+                      remaining >= 0
+                          ? 'Left in budgeted categories: ${money(remaining)}'
+                          : 'Above budgeted limits by: ${money(-remaining)}',
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 12)),
               ],
             ),
           ),
@@ -105,7 +113,8 @@ class _BudgetsPageState extends State<BudgetsPage> {
         const SizedBox(height: 23),
         const SpendSectionHeader(
           title: 'Category budgets',
-          subtitle: 'Limits repeat every month; spending uses the selected month',
+          subtitle:
+              'Limits repeat every month; spending uses the selected month',
         ),
         const SizedBox(height: 13),
         ...SpendCategories.expense.map((category) {
@@ -120,47 +129,60 @@ class _BudgetsPageState extends State<BudgetsPage> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    SpendIconBadge(icon: categoryIcon(category), color: color,
-                      size: 42),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(category,
-                      style: const TextStyle(fontWeight: FontWeight.w800))),
-                    TextButton(
-                      onPressed: () => _editBudget(category),
-                      child: Text(budget == null ? 'Set limit' : 'Edit'),
-                    ),
-                  ]),
-                  const SizedBox(height: 10),
-                  Row(children: [
-                    Expanded(child: Text(money(spent),
-                      style: const TextStyle(fontWeight: FontWeight.w700))),
-                    Flexible(child: Text(
-                      budget == null ? 'No limit set' : 'of ${money(budget)}',
-                      textAlign: TextAlign.end,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    )),
-                  ]),
-                  const SizedBox(height: 11),
-                  SpendProgress(
-                    value: ratio,
-                    color: color,
-                    label: '$category monthly budget use',
-                  ),
-                  const SizedBox(height: 7),
-                  if (budget == null)
-                    Text('Set a monthly limit to track this category.',
-                      style: Theme.of(context).textTheme.bodySmall)
-                  else if (over)
-                    Text('Over budget by ${money(spent - budget)}',
-                      style: const TextStyle(color: SpendColors.orange,
-                        fontWeight: FontWeight.w700))
-                  else
-                    Text('${(ratio * 100).toStringAsFixed(0)}% used  •  '
-                      '${money(budget - spent)} left',
-                      style: Theme.of(context).textTheme.bodySmall),
-                ]),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        SpendIconBadge(
+                            icon: categoryIcon(category),
+                            color: color,
+                            size: 42),
+                        const SizedBox(width: 10),
+                        Expanded(
+                            child: Text(category,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800))),
+                        TextButton(
+                          onPressed: () => _editBudget(category),
+                          child: Text(budget == null ? 'Set limit' : 'Edit'),
+                        ),
+                      ]),
+                      const SizedBox(height: 10),
+                      Row(children: [
+                        Expanded(
+                            child: Text(money(spent),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700))),
+                        Flexible(
+                            child: Text(
+                          budget == null
+                              ? 'No limit set'
+                              : 'of ${money(budget)}',
+                          textAlign: TextAlign.end,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        )),
+                      ]),
+                      const SizedBox(height: 11),
+                      SpendProgress(
+                        value: ratio,
+                        color: color,
+                        label: '$category monthly budget use',
+                      ),
+                      const SizedBox(height: 7),
+                      if (budget == null)
+                        Text('Set a monthly limit to track this category.',
+                            style: Theme.of(context).textTheme.bodySmall)
+                      else if (over)
+                        Text('Over budget by ${money(spent - budget)}',
+                            style: const TextStyle(
+                                color: SpendColors.orange,
+                                fontWeight: FontWeight.w700))
+                      else
+                        Text(
+                            '${(ratio * 100).toStringAsFixed(0)}% used  •  '
+                            '${money(budget - spent)} left',
+                            style: Theme.of(context).textTheme.bodySmall),
+                    ]),
               ),
             ),
           );
@@ -205,39 +227,43 @@ class _BudgetEditorState extends State<_BudgetEditor> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text('${widget.category} budget'),
-    content: Form(
-      key: _formKey,
-      child: TextFormField(
-        controller: _controller,
-        autofocus: true,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        decoration: const InputDecoration(labelText: 'Monthly limit (LKR)'),
-        validator: (value) {
-          final amount = double.tryParse(value?.trim() ?? '');
-          return amount == null || !amount.isFinite || amount <= 0
-              ? 'Enter a positive amount' : null;
-        },
-      ),
-    ),
-    actions: [
-      TextButton(onPressed: () => Navigator.pop(context),
-        child: const Text('Cancel')),
-      if (widget.initialAmount != null)
-        TextButton(
-          onPressed: () => Navigator.pop(context,
-            const _BudgetResult(remove: true)),
-          child: const Text('Remove'),
+        title: Text('${widget.category} budget'),
+        content: Form(
+          key: _formKey,
+          child: TextFormField(
+            controller: _controller,
+            autofocus: true,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(labelText: 'Monthly limit (LKR)'),
+            validator: (value) {
+              final amount = double.tryParse(value?.trim() ?? '');
+              return amount == null || !amount.isFinite || amount <= 0
+                  ? 'Enter a positive amount'
+                  : null;
+            },
+          ),
         ),
-      FilledButton(
-        onPressed: () {
-          if (!_formKey.currentState!.validate()) return;
-          Navigator.pop(context, _BudgetResult(
-            amount: double.parse(_controller.text.trim()),
-          ));
-        },
-        child: const Text('Save'),
-      ),
-    ],
-  );
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          if (widget.initialAmount != null)
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, const _BudgetResult(remove: true)),
+              child: const Text('Remove'),
+            ),
+          FilledButton(
+            onPressed: () {
+              if (!_formKey.currentState!.validate()) return;
+              Navigator.pop(
+                  context,
+                  _BudgetResult(
+                    amount: double.parse(_controller.text.trim()),
+                  ));
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      );
 }

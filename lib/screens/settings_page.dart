@@ -1,5 +1,5 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 import '../data/app_store.dart';
@@ -122,61 +122,63 @@ class SettingsPage extends StatelessWidget {
   Future<void> _confirmDeleteAllData(BuildContext context) async {
     String confirmation = '';
     final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Delete all app data?'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('This deletes all transactions, budgets and '
-                    'preferences from this app installation. It cannot be '
-                    'undone unless you have a separate backup. Export and '
-                    'verify an encrypted backup before continuing.'),
-                const SizedBox(height: 12),
-                const Text('Type DELETE to confirm:'),
-                TextField(
-                  onChanged: (value) => confirmation = value,
-                  autofocus: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  textCapitalization: TextCapitalization.characters,
-                  decoration: const InputDecoration(hintText: 'DELETE'),
-                ),
-              ],
-            ),
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete all app data?'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('This deletes all transactions, budgets and '
+                  'preferences from this app installation. It cannot be '
+                  'undone unless you have a separate backup. Export and '
+                  'verify an encrypted backup before continuing.'),
+              const SizedBox(height: 12),
+              const Text('Type DELETE to confirm:'),
+              TextField(
+                onChanged: (value) => confirmation = value,
+                autofocus: true,
+                autocorrect: false,
+                enableSuggestions: false,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(hintText: 'DELETE'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (confirmation.trim() != 'DELETE') {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      const SnackBar(content: Text('Please type DELETE exactly.')));
-                  return;
-                }
-                Navigator.pop(dialogContext, true);
-              },
-              child: const Text('Delete everything',
-                  style: TextStyle(color: Colors.red)),
-            ),
-          ],
         ),
-      );
-      if (confirmed != true || !context.mounted) return;
-      try {
-        await store.deleteAllData();
-        if (!context.mounted) return;
-        _message(context, 'Local transactions, budgets and preferences cleared.');
-      } catch (_) {
-        if (!context.mounted) return;
-        _message(context, 'Deletion could not be fully verified. '
-            'Check data before assuming it was cleared.');
-      }
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (confirmation.trim() != 'DELETE') {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(const SnackBar(
+                    content: Text('Please type DELETE exactly.')));
+                return;
+              }
+              Navigator.pop(dialogContext, true);
+            },
+            child: const Text('Delete everything',
+                style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    try {
+      await store.deleteAllData();
+      if (!context.mounted) return;
+      _message(context, 'Local transactions, budgets and preferences cleared.');
+    } catch (_) {
+      if (!context.mounted) return;
+      _message(
+          context,
+          'Deletion could not be fully verified. '
+          'Check data before assuming it was cleared.');
+    }
   }
 
   Future<void> _restoreEncrypted(BuildContext context) async {
@@ -349,8 +351,9 @@ class SettingsPage extends StatelessWidget {
                 icon: Icons.delete_forever_outlined, color: Colors.red),
             title: const Text('Delete all app data',
                 style: TextStyle(fontWeight: FontWeight.w700)),
-            subtitle: const Text('Permanently removes local records and budgets; '
-                'exported files are not affected'),
+            subtitle:
+                const Text('Permanently removes local records and budgets; '
+                    'exported files are not affected'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _confirmDeleteAllData(context),
           ),

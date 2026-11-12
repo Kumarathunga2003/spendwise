@@ -58,3 +58,4 @@ android/key.properties
 
 *.apk
 /pubspec (2).lock
+/android/build/

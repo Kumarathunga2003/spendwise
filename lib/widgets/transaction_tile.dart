@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../data/app_store.dart';
 import '../models/money_transaction.dart';
@@ -8,8 +8,11 @@ import 'spend_ui.dart';
 import 'transaction_form.dart';
 
 class TransactionTile extends StatelessWidget {
-  const TransactionTile({super.key, required this.entry,
-    required this.store, this.editable = false});
+  const TransactionTile(
+      {super.key,
+      required this.entry,
+      required this.store,
+      this.editable = false});
   final MoneyTransaction entry;
   final AppStore store;
   final bool editable;
@@ -21,10 +24,12 @@ class TransactionTile extends StatelessWidget {
         title: const Text('Delete transaction?'),
         content: Text('Delete "${entry.title}"? This cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete')),
+          TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Delete')),
         ],
       ),
     );
@@ -32,13 +37,13 @@ class TransactionTile extends StatelessWidget {
     try {
       await store.deleteEntry(entry.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Transaction deleted')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Transaction deleted')));
       }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not delete transaction')));
+            const SnackBar(content: Text('Could not delete transaction')));
       }
     }
   }
@@ -53,19 +58,24 @@ class TransactionTile extends StatelessWidget {
       useSafeArea: true,
       builder: (sheetContext) => Padding(
         padding: const EdgeInsets.fromLTRB(22, 8, 22, 28),
-        child: Column(mainAxisSize: MainAxisSize.min,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(child: SpendIconBadge(icon: categoryIcon(entry.category),
-              color: color, size: 58)),
+            Center(
+                child: SpendIconBadge(
+                    icon: categoryIcon(entry.category),
+                    color: color,
+                    size: 58)),
             const SizedBox(height: 12),
-            Text(entry.title, textAlign: TextAlign.center,
-              style: Theme.of(sheetContext).textTheme.titleLarge),
+            Text(entry.title,
+                textAlign: TextAlign.center,
+                style: Theme.of(sheetContext).textTheme.titleLarge),
             const SizedBox(height: 7),
             Text('${income ? '+' : '-'}${money(entry.amount)}',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 27, fontWeight: FontWeight.w800,
-                color: color)),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 27, fontWeight: FontWeight.w800, color: color)),
             const SizedBox(height: 18),
             _DetailRow(label: 'Type', value: income ? 'Income' : 'Expense'),
             _DetailRow(label: 'Category', value: entry.category),
@@ -73,17 +83,21 @@ class TransactionTile extends StatelessWidget {
             if (entry.note.trim().isNotEmpty)
               _DetailRow(label: 'Note', value: entry.note.trim()),
             const SizedBox(height: 16),
-            FilledButton.icon(onPressed: () {
-              Navigator.pop(sheetContext);
-              openTransactionEditor(context, store, existing: entry);
-            }, icon: const Icon(Icons.edit_outlined),
-              label: const Text('Edit transaction')),
+            FilledButton.icon(
+                onPressed: () {
+                  Navigator.pop(sheetContext);
+                  openTransactionEditor(context, store, existing: entry);
+                },
+                icon: const Icon(Icons.edit_outlined),
+                label: const Text('Edit transaction')),
             const SizedBox(height: 7),
-            TextButton.icon(onPressed: () {
-              Navigator.pop(sheetContext);
-              _delete(context);
-            }, icon: const Icon(Icons.delete_outline),
-              label: const Text('Delete transaction')),
+            TextButton.icon(
+                onPressed: () {
+                  Navigator.pop(sheetContext);
+                  _delete(context);
+                },
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Delete transaction')),
           ],
         ),
       ),
@@ -94,7 +108,8 @@ class TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final income = entry.type == EntryType.income;
     final color = income ? SpendColors.green : SpendColors.orange;
-    return Card(child: InkWell(
+    return Card(
+        child: InkWell(
       borderRadius: BorderRadius.circular(22),
       onTap: () => _details(context),
       child: Padding(
@@ -102,22 +117,31 @@ class TransactionTile extends StatelessWidget {
         child: Row(children: [
           SpendIconBadge(icon: categoryIcon(entry.category), color: color),
           const SizedBox(width: 12),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+          Expanded(
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(entry.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
               Text('${entry.category} · ${shortDate(entry.date)}',
-                maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall),
             ],
           )),
           const SizedBox(width: 8),
-          Flexible(child: Text('${income ? '+' : '-'}${money(entry.amount)}',
-            maxLines: 1, overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.right,
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800,
-              color: color))),
+          Flexible(
+              child: Text('${income ? '+' : '-'}${money(entry.amount)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: color))),
           if (editable)
             PopupMenuButton<String>(
               tooltip: 'Transaction actions',
@@ -146,12 +170,15 @@ class _DetailRow extends StatelessWidget {
   final String value;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      SizedBox(width: 90, child: Text(label,
-        style: Theme.of(context).textTheme.bodySmall)),
-      Expanded(child: Text(value, textAlign: TextAlign.right,
-        style: const TextStyle(fontWeight: FontWeight.w700))),
-    ]),
-  );
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(
+              width: 90,
+              child: Text(label, style: Theme.of(context).textTheme.bodySmall)),
+          Expanded(
+              child: Text(value,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(fontWeight: FontWeight.w700))),
+        ]),
+      );
 }

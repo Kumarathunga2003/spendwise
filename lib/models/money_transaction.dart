@@ -58,11 +58,22 @@ class BudgetLimit {
 
 class SpendCategories {
   static const income = <String>[
-    'Salary', 'Freelance', 'Business', 'Gifts', 'Other',
+    'Salary',
+    'Freelance',
+    'Business',
+    'Gifts',
+    'Other',
   ];
 
   static const expense = <String>[
-    'Food', 'Groceries', 'Transport', 'Shopping', 'Bills',
-    'Education', 'Health', 'Entertainment', 'Other',
+    'Food',
+    'Groceries',
+    'Transport',
+    'Shopping',
+    'Bills',
+    'Education',
+    'Health',
+    'Entertainment',
+    'Other',
   ];
 }

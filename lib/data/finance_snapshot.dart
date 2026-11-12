@@ -18,12 +18,14 @@ class FinanceSnapshot {
 
   static int cents(double value) {
     if (!value.isFinite || value <= 0 || value > 1000000000000) {
-      throw const FormatException('Amounts must be positive, finite and within range.');
+      throw const FormatException(
+          'Amounts must be positive, finite and within range.');
     }
     final scaled = value * 100;
     final rounded = scaled.round();
     if ((scaled - rounded).abs() > 0.00001) {
-      throw const FormatException('Amount cannot have more than 2 decimal places.');
+      throw const FormatException(
+          'Amount cannot have more than 2 decimal places.');
     }
     return rounded;
   }
@@ -37,16 +39,21 @@ class FinanceSnapshot {
       if (e.id.trim().isEmpty || e.id.length > 200 || !ids.add(e.id)) {
         throw const FormatException('Missing or duplicate transaction ID.');
       }
-      if (e.title.trim().isEmpty || e.title.length > 200 ||
-          e.category.trim().isEmpty || e.category.length > 120 ||
-          e.note.length > 5000 || e.date.year < 1900 || e.date.year > 2200) {
+      if (e.title.trim().isEmpty ||
+          e.title.length > 200 ||
+          e.category.trim().isEmpty ||
+          e.category.length > 120 ||
+          e.note.length > 5000 ||
+          e.date.year < 1900 ||
+          e.date.year > 2200) {
         throw const FormatException('Transaction contains invalid fields.');
       }
       cents(e.amount);
     }
     final categories = <String>{};
     for (final b in budgets) {
-      if (b.category.trim().isEmpty || b.category.length > 120 ||
+      if (b.category.trim().isEmpty ||
+          b.category.length > 120 ||
           !categories.add(b.category)) {
         throw const FormatException('Missing or duplicate budget category.');
       }
@@ -66,7 +73,8 @@ class FinanceSnapshot {
         data['entries'] is! List ||
         data['budgets'] is! List ||
         data['dark_mode'] is! bool) {
-      throw const FormatException('Unsupported or incomplete SpendWise backup.');
+      throw const FormatException(
+          'Unsupported or incomplete SpendWise backup.');
     }
     final entries = <MoneyTransaction>[];
     for (final record in data['entries'] as List) {
