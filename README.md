@@ -71,7 +71,7 @@ The app is designed to work **without an account or cloud sync**. Your financial
 
 ## Download and install
 
-**Current release:** `1.0.0+1` · **Android APK**
+**Current release:** `1.0.0` · **Android APK**
 
 1. Open the **[SpendWise v1.0.0 release page](https://github.com/Kumarathunga2003/spendwise/releases/tag/v1.0.0)**.
 2. Under **Assets**, download the Android APK (`SpendWise-v1.0.0.apk` if that is the uploaded filename).
