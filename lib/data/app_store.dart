@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../models/money_transaction.dart';
+import '../models/spendwise_features.dart';
 import '../utils/formatters.dart';
 import 'backup_crypto.dart';
 import 'finance_snapshot.dart';
@@ -17,6 +18,7 @@ class AppStore extends ChangeNotifier {
 
   List<MoneyTransaction> _entries = [];
   List<BudgetLimit> _budgets = [];
+  FeatureData _features = FeatureData.empty();
   bool _ready = false;
   String? _loadError;
   bool _darkMode = false;
@@ -37,10 +39,14 @@ class AppStore extends ChangeNotifier {
   }
 
   List<BudgetLimit> get budgets => List.unmodifiable(_budgets);
+  FeatureData get features => _features;
 
   double get totalIncome => _sum(_entries, EntryType.income);
   double get totalExpense => _sum(_entries, EntryType.expense);
-  double get balance => totalIncome - totalExpense;
+  double get balance =>
+      totalIncome -
+      totalExpense +
+      _features.wallets.fold<int>(0, (sum, w) => sum + w.openingCents) / 100;
 
   // Integer minor-unit aggregation avoids floating-point rounding drift.
   static double _sum(Iterable<MoneyTransaction> values, EntryType type) =>
@@ -74,12 +80,15 @@ class AppStore extends ChangeNotifier {
         entries: _entries,
         budgets: _budgets,
         darkMode: _darkMode,
+        features: _features,
       );
 
   Future<void> load() async {
     try {
       final snapshot = await _storage.load();
       _setState(snapshot);
+      // Generate due rules as an atomic database update before showing the UI.
+      await _postDueRecurringRules();
       _loadError = null;
     } catch (_) {
       // Fail closed: NEVER replace saved data with an empty list on errors.
@@ -95,6 +104,7 @@ class AppStore extends ChangeNotifier {
     _entries = List<MoneyTransaction>.of(value.entries);
     _budgets = List<BudgetLimit>.of(value.budgets);
     _darkMode = value.darkMode;
+    _features = value.features;
   }
 
   void _assertCanWrite() {
@@ -120,7 +130,11 @@ class AppStore extends ChangeNotifier {
   Future<void> saveEntry(MoneyTransaction entry) => _exclusive(() async {
         final next = [..._entries]..removeWhere((e) => e.id == entry.id);
         next.add(entry);
-        FinanceSnapshot(entries: next, budgets: _budgets, darkMode: _darkMode);
+        FinanceSnapshot(
+            entries: next,
+            budgets: _budgets,
+            darkMode: _darkMode,
+            features: _features);
         await _storage.upsertEntry(entry);
         _entries = next;
         notifyListeners();
@@ -137,7 +151,11 @@ class AppStore extends ChangeNotifier {
         final budget = BudgetLimit(category: category, amount: amount);
         final next = [..._budgets]..removeWhere((b) => b.category == category);
         next.add(budget);
-        FinanceSnapshot(entries: _entries, budgets: next, darkMode: _darkMode);
+        FinanceSnapshot(
+            entries: _entries,
+            budgets: next,
+            darkMode: _darkMode,
+            features: _features);
         await _storage.upsertBudget(budget);
         _budgets = next;
         notifyListeners();
@@ -182,6 +200,7 @@ class AppStore extends ChangeNotifier {
             entries: const [],
             budgets: const [],
             darkMode: false,
+            features: FeatureData.empty(),
           ));
           notifyListeners();
         } catch (_) {
@@ -198,4 +217,86 @@ class AppStore extends ChangeNotifier {
           rethrow;
         }
       });
+
+  /// Updates the wallet/goal/rule/reminder collection after secure persistence.
+  Future<void> updateFeatures(FeatureData value) => _exclusive(() async {
+        value.validate();
+        final validWallets = value.wallets.map((w) => w.id).toSet();
+        if (_entries.any((e) => !validWallets.contains(e.walletId))) {
+          throw const FormatException(
+              'This wallet still has transactions. Move them first.');
+        }
+        await _storage.saveFeatures(value);
+        _features = value;
+        notifyListeners();
+      });
+
+  Future<void> importTransactions(Iterable<MoneyTransaction> imported) =>
+      _exclusive(() async {
+        final existing = _entries
+            .map((e) =>
+                '${e.date.year}-${e.date.month}-${e.date.day}|${e.title.toLowerCase()}|'
+                '${e.type.name}|${e.category.toLowerCase()}|${FinanceSnapshot.cents(e.amount)}|${e.note}')
+            .toSet();
+        final incoming = <MoneyTransaction>[];
+        for (final e in imported) {
+          final identity =
+              '${e.date.year}-${e.date.month}-${e.date.day}|${e.title.toLowerCase()}|'
+              '${e.type.name}|${e.category.toLowerCase()}|${FinanceSnapshot.cents(e.amount)}|${e.note}';
+          if (existing.add(identity)) incoming.add(e);
+        }
+        if (incoming.isEmpty) return;
+        final next = FinanceSnapshot(
+            entries: [..._entries, ...incoming],
+            budgets: _budgets,
+            darkMode: _darkMode,
+            features: _features);
+        await _storage.replaceAll(next);
+        _setState(next);
+        notifyListeners();
+      });
+
+  Future<void> _postDueRecurringRules() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final transactions = [..._entries];
+    final ids = transactions.map((e) => e.id).toSet();
+    final nextRules = <RecurringRule>[];
+    var changed = false;
+    for (final rule in _features.recurring) {
+      var current = rule;
+      var count = 0;
+      while (
+          current.enabled && !current.nextDate.isAfter(today) && count < 36) {
+        final due = current.nextDate;
+        final id = 'rec-${rule.id}-${due.year}-${due.month}-${due.day}';
+        if (ids.add(id)) {
+          transactions.add(MoneyTransaction(
+              id: id,
+              title: rule.title,
+              amount: rule.amountCents / 100,
+              type: rule.type,
+              category: rule.category,
+              date: due,
+              walletId: rule.walletId));
+          changed = true;
+        }
+        current = current.withNextDate(advanceRecurring(rule, due));
+        count++;
+        changed = true;
+      }
+      nextRules.add(current);
+    }
+    if (!changed) return;
+    final state = FinanceSnapshot(
+        entries: transactions,
+        budgets: _budgets,
+        darkMode: _darkMode,
+        features: _features.copyWith(recurring: nextRules));
+    await _storage.replaceAll(state);
+    _setState(state);
+  }
+
+  /// Due recurrences are generated when SpendWise opens or resumes.
+  Future<void> processRecurringNow() => _exclusive(_postDueRecurringRules);
 }

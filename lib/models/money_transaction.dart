@@ -8,6 +8,7 @@ class MoneyTransaction {
   final String category;
   final DateTime date;
   final String note;
+  final String walletId;
 
   const MoneyTransaction({
     required this.id,
@@ -17,6 +18,7 @@ class MoneyTransaction {
     required this.category,
     required this.date,
     this.note = '',
+    this.walletId = 'wallet-cash',
   });
 
   Map<String, dynamic> toJson() => {
@@ -27,6 +29,7 @@ class MoneyTransaction {
         'category': category,
         'date': date.toIso8601String(),
         'note': note,
+        'wallet_id': walletId,
       };
 
   factory MoneyTransaction.fromJson(Map<String, dynamic> json) {
@@ -38,6 +41,7 @@ class MoneyTransaction {
       category: json['category'] as String,
       date: DateTime.parse(json['date'] as String),
       note: (json['note'] as String?) ?? '',
+      walletId: (json['wallet_id'] as String?) ?? 'wallet-cash',
     );
   }
 }

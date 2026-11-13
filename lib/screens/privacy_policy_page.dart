@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import '../widgets/spendwise_brand_logo.dart';
 
 /// Before Play submission: replace the two values below with public details
 /// matching your Play Console developer identity and support contact.
@@ -10,19 +11,18 @@ class SpendWisePrivacyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Privacy policy')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 30),
         children: [
-          Icon(Icons.privacy_tip_outlined, size: 40, color: scheme.primary),
+          const SpendWiseBrandLogo(size: 48),
           const SizedBox(height: 12),
           Text('SpendWise Privacy Policy',
               style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 6),
           const Text('Effective date: 7 November 2026'),
-          const SizedBox(height: 18),
+          const SizedBox(height: 15),
           const _PolicySection(
             title: 'What SpendWise does',
             body: 'SpendWise is an offline-first personal finance tracker. '
@@ -33,7 +33,7 @@ class SpendWisePrivacyPage extends StatelessWidget {
             title: 'Information stored on your device',
             body: 'Your transaction titles, amounts, dates, categories, '
                 'notes, budgets and dark-mode preference are saved locally. '
-                'On Android, the current app uses an unencrypted SQLite '
+                'On Android, this release uses a SQLCipher-encrypted SQLite '
                 'database. Anyone with sufficient device access may be able '
                 'to access locally stored information.',
           ),
@@ -62,8 +62,8 @@ class SpendWisePrivacyPage extends StatelessWidget {
           ),
           const _PolicySection(
             title: 'Security',
-            body: 'The Android database itself is not encrypted at rest, '
-                'and this release does not offer an in-app PIN or biometric '
+            body: 'The Android database is encrypted at rest with SQLCipher, '
+                'and this release can offer an optional in-app PIN '
                 'lock. Use your device screen lock and handle backup files '
                 'with care.',
           ),
@@ -90,7 +90,7 @@ class _PolicySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 19),
+        padding: const EdgeInsets.only(bottom: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -99,7 +99,13 @@ class _PolicySection extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     )),
             const SizedBox(height: 6),
-            Text(body),
+            Text(
+              body,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(height: 1.55),
+            ),
           ],
         ),
       );

@@ -26,9 +26,10 @@ void main() {
   });
 
   test('Rejects duplicate transaction IDs', () {
-    expect(() => FinanceSnapshot(
-      entries: [salary, salary], budgets: [], darkMode: false),
-      throwsFormatException);
+    expect(
+        () => FinanceSnapshot(
+            entries: [salary, salary], budgets: [], darkMode: false),
+        throwsFormatException);
   });
 
   test('Rejects fractional cents and invalid amounts', () {
@@ -38,8 +39,13 @@ void main() {
   });
 
   test('Rejects malformed backup data', () {
-    expect(() => FinanceSnapshot.fromJson({
-      'schema_version': 4, 'entries': [], 'budgets': [], 'dark_mode': true,
-    }), throwsFormatException);
+    expect(
+        () => FinanceSnapshot.fromJson({
+              'schema_version': 4,
+              'entries': [],
+              'budgets': [],
+              'dark_mode': true,
+            }),
+        throwsFormatException);
   });
 }

@@ -6,11 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/money_transaction.dart';
+import '../models/spendwise_features.dart';
+import 'secure_finance_storage.dart';
 import 'finance_snapshot.dart';
 
 const _entriesKey = 'spendwise.entries.v1';
 const _budgetsKey = 'spendwise.budgets.v1';
 const _darkKey = 'spendwise.dark_mode.v1';
+const _featuresKey = 'spendwise.features.v1';
 
 abstract class FinanceStorage {
   String get description;
@@ -20,6 +23,7 @@ abstract class FinanceStorage {
   Future<void> upsertBudget(BudgetLimit budget);
   Future<void> deleteBudget(String category);
   Future<void> saveDarkMode(bool value);
+  Future<void> saveFeatures(FeatureData value);
   Future<void> replaceAll(FinanceSnapshot snapshot);
 
   /// Remove all in-app financial records and legacy preference copies.
@@ -33,7 +37,7 @@ FinanceStorage createFinanceStorage() {
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.macOS)) {
-    return SqliteFinanceStorage();
+    return SecureSqliteFinanceStorage();
   }
   return PreferencesFinanceStorage();
 }
@@ -52,6 +56,8 @@ Future<FinanceSnapshot> _readLegacy(SharedPreferencesAsync prefs) async {
     'entries': rawEntriesList,
     'budgets': rawBudgetList,
     'dark_mode': savedMode ?? false,
+    'advanced_features':
+        jsonDecode(await prefs.getString(_featuresKey) ?? '{}'),
   });
 }
 
@@ -101,6 +107,9 @@ class PreferencesFinanceStorage implements FinanceStorage {
 
   @override
   Future<void> saveDarkMode(bool value) => _prefs.setBool(_darkKey, value);
+  @override
+  Future<void> saveFeatures(FeatureData value) =>
+      _prefs.setString(_featuresKey, jsonEncode(value.toJson()));
 
   @override
   Future<void> replaceAll(FinanceSnapshot snapshot) async {
@@ -125,6 +134,7 @@ class PreferencesFinanceStorage implements FinanceStorage {
     await _prefs.remove(_entriesKey);
     await _prefs.remove(_budgetsKey);
     await _prefs.remove(_darkKey);
+    await _prefs.remove(_featuresKey);
   }
 
   Future<void> _writeSnapshot(FinanceSnapshot value) async {
@@ -133,12 +143,18 @@ class PreferencesFinanceStorage implements FinanceStorage {
     await _prefs.setString(
         _budgetsKey, jsonEncode(value.budgets.map((e) => e.toJson()).toList()));
     await _prefs.setBool(_darkKey, value.darkMode);
+    await saveFeatures(value.features);
   }
 }
 
 class SqliteFinanceStorage implements FinanceStorage {
   final SharedPreferencesAsync _legacy = SharedPreferencesAsync();
   Database? _db;
+
+  Future<void> close() async {
+    await _db?.close();
+    _db = null;
+  }
 
   @override
   String get description => 'SQLite on this device (unencrypted database)';
@@ -242,6 +258,8 @@ class SqliteFinanceStorage implements FinanceStorage {
     }
     final rows = await db.query('transactions');
     final limits = await db.query('budgets');
+    final featureRow = await db.query('metadata',
+        where: 'key = ?', whereArgs: ['advanced_features'], limit: 1);
     final modeRow = await db.query('metadata',
         where: 'key = ?', whereArgs: ['dark_mode'], limit: 1);
     return FinanceSnapshot(
@@ -265,6 +283,10 @@ class SqliteFinanceStorage implements FinanceStorage {
               ))
           .toList(),
       darkMode: modeRow.isNotEmpty && modeRow.first['value'] == '1',
+      features: featureRow.isEmpty
+          ? FeatureData.empty()
+          : FeatureData.fromJson(jsonDecode(featureRow.first['value'] as String)
+              as Map<String, dynamic>),
     );
   }
 
@@ -295,6 +317,14 @@ class SqliteFinanceStorage implements FinanceStorage {
   }
 
   @override
+  Future<void> saveFeatures(FeatureData value) async {
+    final db = await _open();
+    await db.insert('metadata',
+        {'key': 'advanced_features', 'value': jsonEncode(value.toJson())},
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  @override
   Future<void> saveDarkMode(bool value) async {
     final db = await _open();
     await db.insert(
@@ -317,6 +347,13 @@ class SqliteFinanceStorage implements FinanceStorage {
       for (final budget in snapshot.budgets) {
         await txn.insert('budgets', _budgetMap(budget));
       }
+      await txn.insert(
+          'metadata',
+          {
+            'key': 'advanced_features',
+            'value': jsonEncode(snapshot.features.toJson())
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace);
       await txn.insert('metadata',
           {'key': 'dark_mode', 'value': snapshot.darkMode ? '1' : '0'},
           conflictAlgorithm: ConflictAlgorithm.replace);
@@ -346,5 +383,6 @@ class SqliteFinanceStorage implements FinanceStorage {
     await _legacy.remove(_entriesKey);
     await _legacy.remove(_budgetsKey);
     await _legacy.remove(_darkKey);
+    await _legacy.remove(_featuresKey);
   }
 }

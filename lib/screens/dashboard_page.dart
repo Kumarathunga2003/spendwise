@@ -47,7 +47,7 @@ class DashboardPage extends StatelessWidget {
             : 'Good evening';
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 11, 18, 32),
+      padding: const EdgeInsets.fromLTRB(16, 9, 16, 30),
       children: [
         Row(children: [
           Expanded(
@@ -65,11 +65,20 @@ class DashboardPage extends StatelessWidget {
               color: SpendColors.teal,
               size: 48),
         ]),
-        const SizedBox(height: 19),
+        const SizedBox(height: 14),
         _HeroBalance(
             balance: store.balance,
             income: store.totalIncome,
             expense: store.totalExpense),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: () => openTransactionEditor(context, store),
+            icon: const Icon(Icons.add_rounded, size: 20),
+            label: const Text('Add transaction'),
+          ),
+        ),
         const SizedBox(height: 20),
         SpendSectionHeader(
           title: 'Monthly snapshot',
@@ -97,7 +106,7 @@ class DashboardPage extends StatelessWidget {
         const SizedBox(height: 11),
         Card(
             child: Padding(
-          padding: const EdgeInsets.all(17),
+          padding: const EdgeInsets.all(15),
           child: Row(children: [
             SpendIconBadge(
                 icon: Icons.savings_rounded,
@@ -128,15 +137,6 @@ class DashboardPage extends StatelessWidget {
                   label: '${(net / income * 100).toStringAsFixed(0)}% saved'),
           ]),
         )),
-        const SizedBox(height: 15),
-        SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Add a transaction'),
-              onPressed: () => openTransactionEditor(context, store),
-            )),
-        const SizedBox(height: 26),
         SpendSectionHeader(
             title: 'Budget health',
             subtitle: currentBudget > 0
@@ -147,7 +147,7 @@ class DashboardPage extends StatelessWidget {
         const SizedBox(height: 11),
         Card(
             child: Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -200,14 +200,14 @@ class DashboardPage extends StatelessWidget {
             ],
           ),
         )),
-        const SizedBox(height: 25),
+        const SizedBox(height: 20),
         SpendSectionHeader(
             title: 'Smart snapshot',
             subtitle: 'Insights based on this month\'s entries'),
         const SizedBox(height: 12),
         Card(
             child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(15),
           child: Row(children: [
             SpendIconBadge(
                 icon: alerts.isNotEmpty
@@ -241,7 +241,7 @@ class DashboardPage extends StatelessWidget {
             )),
           ]),
         )),
-        const SizedBox(height: 25),
+        const SizedBox(height: 20),
         SpendSectionHeader(
             title: 'Recent activity',
             subtitle: 'Your latest money movements',
@@ -278,7 +278,7 @@ class _HeroBalance extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(22),
           gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -293,11 +293,11 @@ class _HeroBalance extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: Stack(children: [
           Positioned(
-              right: -39,
-              top: -64,
+              right: -45,
+              top: -75,
               child: Container(
-                width: 210,
-                height: 210,
+                width: 185,
+                height: 185,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
@@ -315,7 +315,7 @@ class _HeroBalance extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.045)),
               )),
           Padding(
-              padding: const EdgeInsets.all(23),
+              padding: const EdgeInsets.all(19),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -331,23 +331,23 @@ class _HeroBalance extends StatelessWidget {
                             letterSpacing: 1.2,
                             fontWeight: FontWeight.w700)),
                   ]),
-                  const SizedBox(height: 13),
+                  const SizedBox(height: 8),
                   FittedBox(
                       alignment: Alignment.centerLeft,
                       fit: BoxFit.scaleDown,
                       child: Text(money(balance),
                           style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 34,
+                              fontSize: 32,
                               letterSpacing: -0.8,
                               fontWeight: FontWeight.w800))),
-                  const SizedBox(height: 9),
+                  const SizedBox(height: 5),
                   const Text('Your all-time financial position',
                       style: TextStyle(fontSize: 13, color: Color(0xFFD3F0E9))),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 15),
                   Container(
                       height: 1, color: Colors.white.withValues(alpha: 0.17)),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Row(children: [
                     Expanded(
                         child: _HeroTotal(

@@ -69,14 +69,14 @@ class _ReportsPageState extends State<ReportsPage> {
     ];
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       children: [
         SpendMonthSelector(
           label: monthLabel(_month),
           onPrevious: () => _changeMonth(-1),
           onNext: () => _changeMonth(1),
         ),
-        const SizedBox(height: 17),
+        const SizedBox(height: 12),
         SpendSectionHeader(
           title: 'Monthly overview',
           subtitle: 'Your income and spending snapshot',
@@ -102,7 +102,7 @@ class _ReportsPageState extends State<ReportsPage> {
         const SizedBox(height: 10),
         Card(
             child: Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(16),
           child: Row(children: [
             SpendIconBadge(
                 icon: Icons.balance_rounded, color: SpendColors.teal, size: 43),
@@ -123,7 +123,7 @@ class _ReportsPageState extends State<ReportsPage> {
           const SizedBox(height: 12),
           Card(
               child: Padding(
-            padding: const EdgeInsets.all(17),
+            padding: const EdgeInsets.all(15),
             child: Row(children: [
               const SpendIconBadge(
                   icon: Icons.auto_graph_rounded,
@@ -150,7 +150,7 @@ class _ReportsPageState extends State<ReportsPage> {
             ]),
           )),
         ],
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         const SpendSectionHeader(
           title: 'Spending breakdown',
           subtitle: 'Real data grouped by expense category',
@@ -225,58 +225,65 @@ class _ReportsPageState extends State<ReportsPage> {
             );
           }),
         ],
-        const SizedBox(height: 25),
+        const SizedBox(height: 20),
         const SpendSectionHeader(
           title: 'Last 6 months',
           subtitle: 'How income compares with expenses',
         ),
         const SizedBox(height: 12),
-        Card(
-            child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 20, 12, 18),
-          child: Column(children: [
-            Wrap(alignment: WrapAlignment.end, spacing: 20, children: const [
-              _Legend(color: SpendColors.green, label: 'Income'),
-              _Legend(color: SpendColors.orange, label: 'Expenses'),
-            ]),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 182,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: history
-                    .map((item) => Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Expanded(
-                                  child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Flexible(
-                                      child: _bar(item.income, maxAmount,
-                                          SpendColors.green)),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                      child: _bar(item.expense, maxAmount,
-                                          SpendColors.orange)),
-                                ],
-                              )),
-                              const SizedBox(height: 10),
-                              Text(
-                                  monthNames[item.date.month - 1]
-                                      .substring(0, 3),
-                                  style:
-                                      Theme.of(context).textTheme.labelSmall),
-                            ],
-                          ),
-                        ))
-                    .toList(),
+        if (history.every((item) => item.income == 0 && item.expense == 0))
+          const SpendEmptyState(
+            title: 'Trends will appear here',
+            message: 'Add income or expenses to compare monthly changes.',
+            icon: Icons.bar_chart_rounded,
+          )
+        else
+          Card(
+              child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 16, 12, 15),
+            child: Column(children: [
+              Wrap(alignment: WrapAlignment.end, spacing: 20, children: const [
+                _Legend(color: SpendColors.green, label: 'Income'),
+                _Legend(color: SpendColors.orange, label: 'Expenses'),
+              ]),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 158,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: history
+                      .map((item) => Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                    child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                        child: _bar(item.income, maxAmount,
+                                            SpendColors.green)),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                        child: _bar(item.expense, maxAmount,
+                                            SpendColors.orange)),
+                                  ],
+                                )),
+                                const SizedBox(height: 10),
+                                Text(
+                                    monthNames[item.date.month - 1]
+                                        .substring(0, 3),
+                                    style:
+                                        Theme.of(context).textTheme.labelSmall),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                ),
               ),
-            ),
-          ]),
-        )),
+            ]),
+          )),
       ],
     );
   }

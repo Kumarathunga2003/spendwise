@@ -65,7 +65,7 @@ class _BudgetsPageState extends State<BudgetsPage> {
     final remaining = totalBudget - budgetedSpent;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 30),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
       children: [
         SpendMonthSelector(
           label: monthLabel(_month),
@@ -77,10 +77,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
           decoration: BoxDecoration(
             gradient: const LinearGradient(
                 colors: [SpendColors.deep, SpendColors.teal]),
-            borderRadius: BorderRadius.circular(23),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(23),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -96,7 +96,7 @@ class _BudgetsPageState extends State<BudgetsPage> {
                         fontSize: 28,
                       )),
                 ),
-                const SizedBox(height: 13),
+                const SizedBox(height: 10),
                 Text('Category budget limits: ${money(totalBudget)}',
                     style: const TextStyle(color: Colors.white70)),
                 if (totalBudget > 0)
@@ -110,13 +110,13 @@ class _BudgetsPageState extends State<BudgetsPage> {
             ),
           ),
         ),
-        const SizedBox(height: 23),
+        const SizedBox(height: 18),
         const SpendSectionHeader(
           title: 'Category budgets',
           subtitle:
               'Limits repeat every month; spending uses the selected month',
         ),
-        const SizedBox(height: 13),
+        const SizedBox(height: 10),
         ...SpendCategories.expense.map((category) {
           final budget = widget.store.budgetFor(category);
           final spent = widget.store.spendingForCategory(category, _month);
@@ -125,10 +125,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
           final color = over ? SpendColors.orange : SpendColors.teal;
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 9),
             child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -136,7 +136,7 @@ class _BudgetsPageState extends State<BudgetsPage> {
                         SpendIconBadge(
                             icon: categoryIcon(category),
                             color: color,
-                            size: 42),
+                            size: 38),
                         const SizedBox(width: 10),
                         Expanded(
                             child: Text(category,

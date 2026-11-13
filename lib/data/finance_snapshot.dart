@@ -1,4 +1,5 @@
 import '../models/money_transaction.dart';
+import '../models/spendwise_features.dart';
 
 /// A portable, validated representation of the entire SpendWise dataset.
 /// Keep this schema version stable for encrypted backup compatibility.
@@ -6,12 +7,15 @@ class FinanceSnapshot {
   final List<MoneyTransaction> entries;
   final List<BudgetLimit> budgets;
   final bool darkMode;
+  final FeatureData features;
 
   FinanceSnapshot({
     required List<MoneyTransaction> entries,
     required List<BudgetLimit> budgets,
     required this.darkMode,
-  })  : entries = List.unmodifiable(entries),
+    FeatureData? features,
+  })  : features = features ?? FeatureData.empty(),
+        entries = List.unmodifiable(entries),
         budgets = List.unmodifiable(budgets) {
     validate();
   }
@@ -34,6 +38,8 @@ class FinanceSnapshot {
     if (entries.length > 100000 || budgets.length > 1000) {
       throw const FormatException('Backup exceeds supported record limits.');
     }
+    features.validate();
+    final walletIds = features.wallets.map((w) => w.id).toSet();
     final ids = <String>{};
     for (final e in entries) {
       if (e.id.trim().isEmpty || e.id.length > 200 || !ids.add(e.id)) {
@@ -49,6 +55,9 @@ class FinanceSnapshot {
         throw const FormatException('Transaction contains invalid fields.');
       }
       cents(e.amount);
+      if (!walletIds.contains(e.walletId)) {
+        throw const FormatException('Transaction belongs to a missing wallet.');
+      }
     }
     final categories = <String>{};
     for (final b in budgets) {
@@ -66,6 +75,7 @@ class FinanceSnapshot {
         'entries': entries.map((e) => e.toJson()).toList(),
         'budgets': budgets.map((e) => e.toJson()).toList(),
         'dark_mode': darkMode,
+        'advanced_features': features.toJson(),
       };
 
   factory FinanceSnapshot.fromJson(Map<String, dynamic> data) {
@@ -95,6 +105,10 @@ class FinanceSnapshot {
       entries: entries,
       budgets: budgets,
       darkMode: data['dark_mode'] as bool,
+      features: data['advanced_features'] is Map
+          ? FeatureData.fromJson(
+              Map<String, dynamic>.from(data['advanced_features'] as Map))
+          : FeatureData.empty(),
     );
   }
 }

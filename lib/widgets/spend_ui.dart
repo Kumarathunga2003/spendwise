@@ -47,10 +47,16 @@ class SpendSectionHeader extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
+                Text(title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge),
                 if (subtitle != null) ...[
                   const SizedBox(height: 3),
-                  Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
+                  Text(subtitle!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall),
                 ],
               ])),
           if (action != null) action!,
@@ -60,7 +66,7 @@ class SpendSectionHeader extends StatelessWidget {
 
 class SpendIconBadge extends StatelessWidget {
   const SpendIconBadge(
-      {super.key, required this.icon, required this.color, this.size = 44});
+      {super.key, required this.icon, required this.color, this.size = 40});
   final IconData icon;
   final Color color;
   final double size;
@@ -97,17 +103,17 @@ class SpendEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
           child: Column(children: [
             SpendIconBadge(
                 icon: icon,
                 color: Theme.of(context).colorScheme.primary,
-                size: 62),
-            const SizedBox(height: 14),
+                size: 48),
+            const SizedBox(height: 11),
             Text(title,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 6),
+            const SizedBox(height: 5),
             Text(message,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium),
@@ -130,7 +136,7 @@ class SpendMonthSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           child: Row(children: [
             IconButton(
                 tooltip: 'Previous month',
@@ -138,8 +144,7 @@ class SpendMonthSelector extends StatelessWidget {
                 icon: const Icon(Icons.chevron_left_rounded)),
             Expanded(
                 child: Column(children: [
-              Text('SELECTED MONTH',
-                  style: Theme.of(context).textTheme.labelSmall),
+              Text('MONTH', style: Theme.of(context).textTheme.labelSmall),
               const SizedBox(height: 4),
               Text(label,
                   textAlign: TextAlign.center,

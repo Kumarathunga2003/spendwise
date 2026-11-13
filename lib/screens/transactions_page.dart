@@ -53,12 +53,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
         .fold<double>(0, (sum, e) => sum + e.amount);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 13, 18, 32),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 30),
       children: [
         SpendSectionHeader(
             title: 'Transaction history',
             subtitle: 'Search, review and manage your entries'),
-        const SizedBox(height: 17),
+        const SizedBox(height: 12),
         SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
@@ -66,7 +66,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               icon: const Icon(Icons.add_rounded),
               label: const Text('New transaction'),
             )),
-        const SizedBox(height: 17),
+        const SizedBox(height: 12),
         TextField(
           controller: _searchController,
           onChanged: (text) => setState(() => _query = text),
@@ -86,7 +86,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   ),
           ),
         ),
-        const SizedBox(height: 13),
+        const SizedBox(height: 10),
         Wrap(spacing: 8, runSpacing: 8, children: [
           ChoiceChip(
               label: const Text('All'),
@@ -105,7 +105,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               selected: _currentMonthOnly,
               onSelected: (value) => setState(() => _currentMonthOnly = value)),
         ]),
-        const SizedBox(height: 17),
+        const SizedBox(height: 12),
         Card(
             child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
@@ -124,7 +124,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     color: SpendColors.orange)),
           ]),
         )),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         SpendSectionHeader(
           title: 'Activity',
           subtitle: '${entries.length} result${entries.length == 1 ? '' : 's'}',
@@ -140,10 +140,24 @@ class _TransactionsPageState extends State<TransactionsPage> {
         ),
         const SizedBox(height: 12),
         if (entries.isEmpty)
-          const SpendEmptyState(
-            title: 'No matching transactions',
-            message: 'Try a different search or remove a filter.',
-            icon: Icons.manage_search_rounded,
+          SpendEmptyState(
+            title: widget.store.entries.isEmpty
+                ? 'Your activity starts here'
+                : 'No matching transactions',
+            message: widget.store.entries.isEmpty
+                ? 'Add your first income or expense to see it here.'
+                : 'Try a different search or clear your filters.',
+            icon: widget.store.entries.isEmpty
+                ? Icons.receipt_long_outlined
+                : Icons.manage_search_rounded,
+            action: widget.store.entries.isEmpty
+                ? FilledButton.icon(
+                    onPressed: () =>
+                        openTransactionEditor(context, widget.store),
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('Add transaction'),
+                  )
+                : null,
           )
         else
           ...entries.map((entry) => Padding(

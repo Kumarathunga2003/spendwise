@@ -1,10 +1,14 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
+import '../widgets/spendwise_brand_logo.dart';
 import 'package:flutter/services.dart';
 
 import '../data/app_store.dart';
 import '../data/finance_snapshot.dart';
 import 'privacy_policy_page.dart';
+import '../security/app_security.dart';
+import '../security/security_settings_page.dart';
+import '../notifications/expense_notifications.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import '../widgets/spend_ui.dart';
@@ -48,7 +52,7 @@ class SettingsPage extends StatelessWidget {
                 ? 'Choose a unique passphrase of at least 12 characters. '
                     'You will need it to restore this file. It cannot be recovered.'
                 : 'Enter the passphrase used when this backup file was created.'),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             TextField(
               controller: first,
               obscureText: true,
@@ -58,7 +62,7 @@ class SettingsPage extends StatelessWidget {
               decoration: const InputDecoration(labelText: 'Backup passphrase'),
             ),
             if (newBackup) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               TextField(
                 controller: second,
                 obscureText: true,
@@ -134,7 +138,7 @@ class SettingsPage extends StatelessWidget {
                   'preferences from this app installation. It cannot be '
                   'undone unless you have a separate backup. Export and '
                   'verify an encrypted backup before continuing.'),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               const Text('Type DELETE to confirm:'),
               TextField(
                 onChanged: (value) => confirmation = value,
@@ -169,7 +173,12 @@ class SettingsPage extends StatelessWidget {
     );
     if (confirmed != true || !context.mounted) return;
     try {
+      final reminders = store.features.reminders;
       await store.deleteAllData();
+      await AppSecurity.instance.clearLockSettings();
+      try {
+        await ExpenseNotifications.cancelAll(reminders);
+      } catch (_) {/* No notifications on some platforms. */}
       if (!context.mounted) return;
       _message(context, 'Local transactions, budgets and preferences cleared.');
     } catch (_) {
@@ -221,7 +230,12 @@ class SettingsPage extends StatelessWidget {
         ),
       );
       if (approved != true || !context.mounted) return;
+      final oldReminders = store.features.reminders;
       await store.restoreSnapshot(preview);
+      try {
+        await ExpenseNotifications.cancelAll(oldReminders);
+        await ExpenseNotifications.sync(store.features.reminders);
+      } catch (_) {/* Not supported on every desktop/platform. */}
       if (!context.mounted) return;
       _message(context,
           'Restore finished. ${preview.entries.length} transactions loaded.');
@@ -237,43 +251,44 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 20, 18, 30),
+    final settingsContent = ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
       children: [
         Container(
-          padding: const EdgeInsets.all(19),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: SpendColors.teal,
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(19),
           ),
           child: const Row(children: [
-            Icon(Icons.account_balance_wallet_rounded,
-                size: 39, color: SpendColors.mint),
+            SpendWiseBrandLogo(size: 48),
             SizedBox(width: 13),
             Expanded(
                 child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('SpendWise',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 21,
-                        fontWeight: FontWeight.w800)),
+                SpendWiseWordmark(width: 180, onDarkSurface: true),
                 SizedBox(height: 4),
                 Text('Safer everyday money tracking',
-                    style: TextStyle(color: Colors.white70)),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      height: 1.35,
+                    )),
               ],
             )),
           ]),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 19),
         const SpendSectionHeader(
             title: 'Preferences',
             subtitle: 'Make SpendWise feel right for you'),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         Card(
             child: SwitchListTile(
-          contentPadding: const EdgeInsets.fromLTRB(14, 7, 16, 7),
+          contentPadding: const EdgeInsets.fromLTRB(12, 2, 12, 2),
           secondary: const SpendIconBadge(
               icon: Icons.dark_mode_outlined, color: SpendColors.teal),
           title: const Text('Dark mode',
@@ -289,11 +304,11 @@ class SettingsPage extends StatelessWidget {
             }
           },
         )),
-        const SizedBox(height: 24),
+        const SizedBox(height: 19),
         const SpendSectionHeader(
             title: 'Your data',
             subtitle: 'Local database and protected backups'),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         Card(
             child: Column(children: [
           ListTile(
@@ -345,24 +360,12 @@ class SettingsPage extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _copyCsv(context),
           ),
-          const Divider(height: 1, indent: 16, endIndent: 16),
-          ListTile(
-            leading: const SpendIconBadge(
-                icon: Icons.delete_forever_outlined, color: Colors.red),
-            title: const Text('Delete all app data',
-                style: TextStyle(fontWeight: FontWeight.w700)),
-            subtitle:
-                const Text('Permanently removes local records and budgets; '
-                    'exported files are not affected'),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _confirmDeleteAllData(context),
-          ),
         ])),
-        const SizedBox(height: 24),
+        const SizedBox(height: 19),
         const SpendSectionHeader(
             title: 'Privacy & security',
             subtitle: 'Know the limits of local storage'),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         Card(
             child: Column(children: [
           ListTile(
@@ -383,17 +386,39 @@ class SettingsPage extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.w700)),
             subtitle:
                 Text('No account or cloud sync. Android records use SQLite; '
-                    'the database is NOT encrypted at rest.'),
+                    'records are encrypted using SQLCipher on Android.'),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
-          const ListTile(
-            leading: SpendIconBadge(
+          ListTile(
+            leading: const SpendIconBadge(
                 icon: Icons.lock_outline_rounded, color: SpendColors.orange),
-            title: Text('App lock'),
-            subtitle: Text('Not yet available. Use your device screen lock.'),
-            trailing: Icon(Icons.info_outline_rounded),
+            title: const Text('App lock'),
+            subtitle: const Text('Set your PIN and automatic lock time'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) =>
+                    SecuritySettingsPage(security: AppSecurity.instance))),
           ),
         ])),
+        const SizedBox(height: 19),
+        const SpendSectionHeader(
+          title: 'Danger zone',
+          subtitle: 'Actions that permanently remove local data',
+        ),
+        const SizedBox(height: 10),
+        Card(
+          child: ListTile(
+            leading: const SpendIconBadge(
+              icon: Icons.delete_forever_outlined,
+              color: SpendColors.red,
+            ),
+            title: const Text('Delete all app data',
+                style: TextStyle(fontWeight: FontWeight.w700)),
+            subtitle: const Text('Removes locally saved financial records'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _confirmDeleteAllData(context),
+          ),
+        ),
         const SizedBox(height: 18),
         Card(
             child: const Padding(
@@ -403,11 +428,18 @@ class SettingsPage extends StatelessWidget {
               'to that backup. CSV export is not encrypted. Do not uninstall '
               'the app or clear its data before checking a backup.'),
         )),
-        const SizedBox(height: 20),
+        const SizedBox(height: 15),
         Center(
             child: Text('SpendWise • Version 1.0',
                 style: Theme.of(context).textTheme.bodySmall)),
       ],
+    );
+    // Scaffold provides the correct Material text style (no yellow underlines).
+    // SafeArea keeps the banner below the status bar and punch-hole camera.
+    return Scaffold(
+      body: SafeArea(
+        child: settingsContent,
+      ),
     );
   }
 }
